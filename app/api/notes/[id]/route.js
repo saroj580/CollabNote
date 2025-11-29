@@ -69,7 +69,7 @@ export async function PUT(request, { params }) {
     }
 
     const { id } = await params
-    const { title, content, isPublic, saveVersion } = await request.json()
+    const { title, content, isPublic } = await request.json()
 
     await connectDB()
 
@@ -87,8 +87,17 @@ export async function PUT(request, { params }) {
       return NextResponse.json({ error: "Access denied" }, { status: 403 })
     }
 
-    // Save version if requested
-    if (saveVersion && note.content) {
+    // Always save current as version before updating, but only if content actually changes
+    let shouldVersion = false;
+    if (content !== undefined) {
+      // Compare current content to new content (stringify for deep equality)
+      const oldContentStr = JSON.stringify(note.content);
+      const newContentStr = JSON.stringify(content);
+      if (oldContentStr !== newContentStr) {
+        shouldVersion = true;
+      }
+    }
+    if (shouldVersion && note.content) {
       note.versions.push({
         content: note.content,
         savedAt: new Date(),
