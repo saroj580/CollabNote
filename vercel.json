@@ -18,6 +18,5 @@
             "src": "/(.*)",
             "dest": "/$1"
         }
-    ],
-    "output": "standalone"
+    ]
 }
